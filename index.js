@@ -1,29 +1,38 @@
 // code is requireing config from openai
 const { Configuration, OpenAIApi } = require("openai");
 const express = require("express");
+const bodyParser = require("body-parser");
+const cors = require("cors");
 
 const configuration = new Configuration({
 	// setting config with the organization
 	organization: "org-6WwaBhOX1G4NPsOUy4LPfXuE",
-	apiKey: "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", //TODO: do this with .env key
+	apiKey: "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", //TODO: do this with .env key
 });
 const openai = new OpenAIApi(configuration);
 
 // express api that calls the function above
-
 const app = express();
-const port = 3000;
+app.use(bodyParser.json());
+app.use(cors());
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+const port = 3080;
 
 app.post("/", async (req, res) => {
+	const { message } = req.body;
+	console.log(message, "message");
 	const response = await openai.createCompletion({
 		model: "text-davinci-003",
-		prompt: "Say this is a test",
-		max_tokens: 7,
-		temperature: 0,
+		prompt: `${message}`,
+		max_tokens: 100,
+		temperature: 0.5,
 	});
-	console.log(response.data.choices[0].text);
+
 	// response data will be the the data from openai
-	res.json({ data: resppnse.data });
+	res.json({ message: response.data.choices[0].text });
 });
 
 app.listen(port, () => {
